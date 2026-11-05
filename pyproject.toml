@@ -11,10 +11,12 @@ requires-python = ">=3.12"
 dependencies = [
     "numpy>=1.26",
     "pandas>=2.1",
+    "pyarrow>=14",          # parquet storage of the generator's ground truth
     "openpyxl>=3.1",
     "sqlalchemy>=2.0",
     "flask>=3.0",
     "matplotlib>=3.8",
+    "scikit-learn>=1.4",    # 30-day failure risk models (prevision.py)
 ]
 
 [project.optional-dependencies]

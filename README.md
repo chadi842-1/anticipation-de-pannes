@@ -41,7 +41,7 @@ Python 3.12+.
 ```bash
 pip install -e ".[dev]"
 pannes run                    # demo: 2024 files, nothing new, 2025 files arrive; KPIs; risk backtest
-pytest -q                     # 96 tests
+pytest -q                     # 100 tests
 pannes serve                  # Flask app on http://localhost:5000 (risk list at /risques)
 pannes predict                # re-run the risk backtest and score current risk
 pannes ddl                    # regenerate sql/sqlserver/schema.sql and views.sql
@@ -85,25 +85,28 @@ intervals by bootstrap over machines.
 | Fleet rate per part (baseline) | 0.660 [0.634, 0.693] | 23 / 100 |
 | Machine-part own rate | 0.687 [0.658, 0.714] | 39 / 100 |
 | Logistic regression | 0.723 [0.693, 0.750] | 42 / 100 |
-| **Gradient boosting** | **0.724 [0.695, 0.754]** | 41 / 100 |
+| **Gradient boosting (calibrated)** | **0.732 [0.701, 0.761]** | 51 / 100 |
 
-- Ranking improves clearly over the fleet-rate baseline (gradient boosting gains +0.035 to +0.092
-  AUC): a monthly inspection list of the top 20 machine-parts hits about twice as many real
-  failures as one built from average part rates.
-- It is still a modest model: the top 20 catch only 41 of 292 failures in the test period, and
+- Ranking improves clearly over the fleet-rate baseline (gradient boosting gains +0.039 to +0.099
+  AUC): a monthly inspection list of the top 20 machine-parts hits more than twice as many real
+  failures as one built from average part rates (51 vs 23 per 100 inspections).
+- It is still a modest model: the top 20 catch only 51 of 292 failures in the test period, and
   the most useful signals are the part's fleet rate and the time since its last failure.
-- Probabilities are not well calibrated at the top for gradient boosting (highest bin: 0.48
-  predicted, 0.34 observed); logistic regression is better calibrated (0.30 vs 0.31). Read the
-  risk list as a ranking, not as exact probabilities.
+- The gradient boosting probabilities are calibrated with isotonic regression (5-fold on the
+  training set): the highest bin moves from 0.48 predicted / 0.34 observed (raw) to 0.40 / 0.36,
+  and the Brier score from 0.110 to 0.106. The 5-fold averaging also nudges the ranking up a
+  little (AUC 0.724 → 0.732, top 20 41 → 51). Still, read the risk list first as a ranking.
 - For spare parts (expected failures per part and month) the models do **not** beat simple
-  rates (MAE 1.46 for gradient boosting vs 1.33 for the fleet rate).
+  rates (MAE 1.38 for gradient boosting vs 1.33 for the fleet rate).
 
 ![Backtest](reports/prevision.png)
 
 **Flask app.** Declaring a breakdown that overlaps an open one on the same machine is refused with
 the conflicting breakdown named; a breakdown older than 24 h is accepted only with a delay reason;
 dates in the future, unknown equipment or parts and duplicates are refused. `/risques` lists the
-machine-parts with the highest 30-day risk, filterable by site.
+machine-parts with the highest 30-day risk, filterable by site. The page adapts to the browser's
+light or dark theme. Both tables export to CSV (`/pannes.csv`, `/risques.csv`), and `/api/kpi`
+returns the reliability KPIs as JSON.
 
 ## Design choices
 
@@ -136,5 +139,5 @@ src/pannes/    config, synthetic, clean, db, kpi, prevision, declarations, app, 
                templates/
 sql/sqlserver/ schema.sql and views.sql (generated T-SQL)
 reports/       generated results and figures
-tests/         96 tests
+tests/         100 tests
 ```

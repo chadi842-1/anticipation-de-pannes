@@ -227,85 +227,85 @@
       ]
     },
     "gradient_boosting": {
-      "auc": 0.7243,
-      "pr_auc": 0.3089,
-      "brier": 0.10959,
+      "auc": 0.7321,
+      "pr_auc": 0.331,
+      "brier": 0.10582,
       "auc_ci95": [
-        0.695,
-        0.7542
+        0.7013,
+        0.7611
       ],
       "gain_vs_taux_flotte_ci95": [
-        0.0345,
-        0.0916
+        0.0386,
+        0.0985
       ],
       "top20_per_month": {
-        "precision": 0.41,
-        "recall": 0.1404,
-        "failures_caught": 41,
+        "precision": 0.51,
+        "recall": 0.1747,
+        "failures_caught": 51,
         "failures_total": 292,
         "inspections": 100
       },
       "spare_parts": {
-        "mae_per_part_month": 1.4594,
-        "total_predicted": 331.6,
+        "mae_per_part_month": 1.3767,
+        "total_predicted": 326.0,
         "total_actual": 292
       },
       "calibration": [
         {
-          "predicted": 0.0188,
-          "observed": 0.037,
+          "predicted": 0.0322,
+          "observed": 0.0372,
+          "n": 269
+        },
+        {
+          "predicted": 0.0637,
+          "observed": 0.0259,
           "n": 270
         },
         {
-          "predicted": 0.0363,
-          "observed": 0.0481,
+          "predicted": 0.0832,
+          "observed": 0.0755,
+          "n": 265
+        },
+        {
+          "predicted": 0.1029,
+          "observed": 0.1014,
+          "n": 276
+        },
+        {
+          "predicted": 0.1277,
+          "observed": 0.1185,
           "n": 270
         },
         {
-          "predicted": 0.0562,
-          "observed": 0.063,
-          "n": 270
+          "predicted": 0.1663,
+          "observed": 0.1604,
+          "n": 268
         },
         {
-          "predicted": 0.0837,
-          "observed": 0.1,
-          "n": 270
+          "predicted": 0.2343,
+          "observed": 0.2059,
+          "n": 272
         },
         {
-          "predicted": 0.1184,
-          "observed": 0.1222,
-          "n": 270
-        },
-        {
-          "predicted": 0.1699,
-          "observed": 0.1407,
-          "n": 270
-        },
-        {
-          "predicted": 0.2653,
-          "observed": 0.2333,
-          "n": 270
-        },
-        {
-          "predicted": 0.4794,
-          "observed": 0.337,
+          "predicted": 0.396,
+          "observed": 0.3556,
           "n": 270
         }
       ]
     }
   },
   "feature_effects": {
-    "taux_piece_flotte": 0.1166,
-    "jours_depuis_derniere": 0.0606,
-    "n_machine_365": 0.05,
-    "age_machine": 0.0157,
-    "n_machine_90": 0.0135,
-    "n_piece_365": 0.0102,
-    "piece": 0.0087,
-    "type": 0.0066,
-    "jours_historique": 0.0,
-    "jamais_vue": -0.0005,
-    "site": -0.0018
+    "taux_piece_flotte": 0.1154,
+    "jours_depuis_derniere": 0.0665,
+    "n_machine_365": 0.0652,
+    "age_machine": 0.0191,
+    "n_piece_365": 0.012,
+    "n_machine_90": 0.0115,
+    "piece": 0.0111,
+    "type": 0.007,
+    "site": 0.004,
+    "jamais_vue": 0.0005,
+    "jours_historique": 0.0
   },
   "current_risk_top10": [
     {
@@ -316,43 +316,7 @@
       "jours_depuis_derniere": 55.0,
       "jamais_vue": 0,
       "n_piece_365": 4,
-      "proba_30j": 0.7354740699816098,
-      "proba_taux_flotte": 0.13999981025785324,
-      "calcule_le": "2025-07-01"
-    },
-    {
-      "equipement": "CNV-022",
-      "type": "Convoyeur",
-      "site": "Jorf Lasfar",
-      "piece": "Roulement",
-      "jours_depuis_derniere": 58.0,
-      "jamais_vue": 0,
-      "n_piece_365": 6,
-      "proba_30j": 0.6027534361759881,
-      "proba_taux_flotte": 0.13999981025785324,
-      "calcule_le": "2025-07-01"
-    },
-    {
-      "equipement": "CNV-022",
-      "type": "Convoyeur",
-      "site": "Jorf Lasfar",
-      "piece": "Courroie",
-      "jours_depuis_derniere": 111.0,
-      "jamais_vue": 0,
-      "n_piece_365": 4,
-      "proba_30j": 0.5945388119132119,
-      "proba_taux_flotte": 0.1802957710417571,
-      "calcule_le": "2025-07-01"
-    },
-    {
-      "equipement": "CNV-018",
-      "type": "Convoyeur",
-      "site": "Jorf Lasfar",
-      "piece": "Roulement",
-      "jours_depuis_derniere": 113.0,
-      "jamais_vue": 0,
-      "n_piece_365": 4,
-      "proba_30j": 0.5886976770779275,
+      "proba_30j": 0.6777172168477825,
       "proba_taux_flotte": 0.13999981025785324,
       "calcule_le": "2025-07-01"
     },
@@ -364,31 +328,43 @@
       "jours_depuis_derniere": 29.0,
       "jamais_vue": 0,
       "n_piece_365": 7,
-      "proba_30j": 0.5835124516450888,
+      "proba_30j": 0.5523078454487249,
       "proba_taux_flotte": 0.2654527192337517,
       "calcule_le": "2025-07-01"
     },
     {
-      "equipement": "CNV-008",
+      "equipement": "CNV-022",
       "type": "Convoyeur",
-      "site": "Casablanca",
-      "piece": "Rouleau",
-      "jours_depuis_derniere": 41.0,
+      "site": "Jorf Lasfar",
+      "piece": "Courroie",
+      "jours_depuis_derniere": 111.0,
       "jamais_vue": 0,
-      "n_piece_365": 7,
-      "proba_30j": 0.55177883926806,
-      "proba_taux_flotte": 0.15750655458549778,
+      "n_piece_365": 4,
+      "proba_30j": 0.5047588624000584,
+      "proba_taux_flotte": 0.1802957710417571,
       "calcule_le": "2025-07-01"
     },
     {
-      "equipement": "PRS-001",
-      "type": "Presse hydraulique",
-      "site": "Casablanca",
-      "piece": "Joint",
-      "jours_depuis_derniere": 77.0,
+      "equipement": "CNV-022",
+      "type": "Convoyeur",
+      "site": "Jorf Lasfar",
+      "piece": "Roulement",
+      "jours_depuis_derniere": 58.0,
       "jamais_vue": 0,
-      "n_piece_365": 10,
-      "proba_30j": 0.5433274990048981,
+      "n_piece_365": 6,
+      "proba_30j": 0.4984230179821604,
+      "proba_taux_flotte": 0.13999981025785324,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "PRS-020",
+      "type": "Presse hydraulique",
+      "site": "Jorf Lasfar",
+      "piece": "Joint",
+      "jours_depuis_derniere": 90.0,
+      "jamais_vue": 0,
+      "n_piece_365": 6,
+      "proba_30j": 0.48733725961260194,
       "proba_taux_flotte": 0.2688022222207884,
       "calcule_le": "2025-07-01"
     },
@@ -400,7 +376,31 @@
       "jours_depuis_derniere": 96.0,
       "jamais_vue": 0,
       "n_piece_365": 6,
-      "proba_30j": 0.5401739062288748,
+      "proba_30j": 0.4795995519948317,
+      "proba_taux_flotte": 0.2688022222207884,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "CMP-023",
+      "type": "Compresseur",
+      "site": "Jorf Lasfar",
+      "piece": "Filtre",
+      "jours_depuis_derniere": 67.0,
+      "jamais_vue": 0,
+      "n_piece_365": 4,
+      "proba_30j": 0.4702686139725277,
+      "proba_taux_flotte": 0.2654527192337517,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "PRS-011",
+      "type": "Presse hydraulique",
+      "site": "Mohammedia",
+      "piece": "Joint",
+      "jours_depuis_derniere": 75.0,
+      "jamais_vue": 0,
+      "n_piece_365": 7,
+      "proba_30j": 0.4540598227637366,
       "proba_taux_flotte": 0.2688022222207884,
       "calcule_le": "2025-07-01"
     },
@@ -412,19 +412,19 @@
       "jours_depuis_derniere": 21.0,
       "jamais_vue": 0,
       "n_piece_365": 6,
-      "proba_30j": 0.5375272720811852,
+      "proba_30j": 0.4489387471058974,
       "proba_taux_flotte": 0.2654527192337517,
       "calcule_le": "2025-07-01"
     },
     {
-      "equipement": "PRS-020",
+      "equipement": "PRS-001",
       "type": "Presse hydraulique",
-      "site": "Jorf Lasfar",
+      "site": "Casablanca",
       "piece": "Joint",
-      "jours_depuis_derniere": 90.0,
+      "jours_depuis_derniere": 77.0,
       "jamais_vue": 0,
-      "n_piece_365": 6,
-      "proba_30j": 0.5302539150400993,
+      "n_piece_365": 10,
+      "proba_30j": 0.43440865889751146,
       "proba_taux_flotte": 0.2688022222207884,
       "calcule_le": "2025-07-01"
     }

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Anticipation des pannes{% endblock %}</title>
+  <style>
+    :root { --ink:#0b0b0b; --ink2:#52514e; --line:#e4e3df; --bg:#fcfcfb; --surface:#fff;
+            --field:#fff; --field-line:#cfcdc8; --accent:#2a78d6; --accent-ink:#fff;
+            --err:#b42318; --err-bg:#fef3f2; --ok:#067647; --ok-bg:#ecfdf3;
+            --warn:#9a6700; --warn-bg:#fffaeb; --hi:#b42318; --tag:#f2f1ee; --track:#f2f1ee; }
+    @media (prefers-color-scheme: dark) {
+      :root { --ink:#f3f2ef; --ink2:#a8a6a1; --line:#2c2b29; --bg:#131312; --surface:#1b1b1a;
+              --field:#242322; --field-line:#3a3938; --accent:#5a9bea; --accent-ink:#06121f;
+              --err:#ff9a8f; --err-bg:#2a1512; --ok:#6fd99f; --ok-bg:#0f2318;
+              --warn:#e9c268; --warn-bg:#26200f; --hi:#ff9a8f; --tag:#2c2b29; --track:#2c2b29; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+           color: var(--ink); background: var(--bg); }
+    a { color: var(--accent); }
+    header.top { border-bottom: 1px solid var(--line); background: var(--surface); }
+    header.top .wrap { max-width: 1040px; margin: 0 auto; padding: 12px 16px;
+                       display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+    header.top .brand { font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
+    header.top nav { display: flex; gap: 14px; }
+    header.top nav a { font-size: 14px; text-decoration: none; color: var(--ink2); padding-bottom: 2px; }
+    header.top nav a.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    p.sub { color: var(--ink2); margin: 0 0 20px; }
+    .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
+    .btn, button { font: inherit; padding: 9px 16px; border: 0; border-radius: 6px;
+                   background: var(--accent); color: var(--accent-ink); cursor: pointer;
+                   text-decoration: none; display: inline-block; }
+    .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--field-line); }
+    input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--field-line);
+                              border-radius: 6px; background: var(--field); color: var(--ink); }
+    label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink2); }
+    .msg { padding: 10px 12px; border-radius: 6px; margin: 0 0 8px; }
+    .msg.error { background: var(--err-bg); color: var(--err); }
+    .msg.ok { background: var(--ok-bg); color: var(--ok); }
+    .hint { font-size: 12px; color: var(--warn); }
+    .scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+    th { color: var(--ink2); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .tag { font-size: 12px; padding: 1px 6px; border-radius: 4px; background: var(--tag); color: var(--ink2); }
+    .tag.late { background: var(--warn-bg); color: var(--warn); }
+    .tag.crit { background: var(--err-bg); color: var(--err); }
+    .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 4px 0 20px; }
+    .stat { border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+            padding: 12px 16px; min-width: 150px; }
+    .stat .k { font-size: 12px; color: var(--ink2); text-transform: uppercase; letter-spacing: .02em; }
+    .stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+    .empty { padding: 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--ink2); }
+    .note { font-size: 13px; color: var(--ink2); margin-top: 16px; }
+    {% block style %}{% endblock %}
+  </style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="{{ url_for('index') }}">Anticipation des pannes</a>
+    <nav>
+      <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">Déclarer</a>
+      <a href="{{ url_for('risques') }}" class="{{ 'active' if request.endpoint == 'risques' else '' }}">Risque 30 j</a>
+    </nav>
+  </div>
+</header>
+<main>
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

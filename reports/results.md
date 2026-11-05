@@ -57,8 +57,8 @@ These views are what a Power BI report would connect to; no Power BI report is b
 | Fleet rate per part (baseline) | 0.660 [0.634, 0.693] | baseline | 0.210 | 0.1123 | 23/100 (23 %) | 1.33 |
 | Machine-part own rate | 0.687 [0.658, 0.714] | [-0.001, +0.049] | 0.272 | 0.1098 | 39/100 (39 %) | 1.32 |
 | Logistic regression | 0.723 [0.693, 0.750] | [+0.025, +0.093] | 0.292 | 0.1095 | 42/100 (42 %) | 1.71 |
-| Gradient boosting | 0.724 [0.695, 0.754] | [+0.035, +0.092] | 0.309 | 0.1096 | 41/100 (41 %) | 1.46 |
+| Gradient boosting (calibrated) | 0.732 [0.701, 0.761] | [+0.039, +0.099] | 0.331 | 0.1058 | 51/100 (51 %) | 1.38 |
 
-Most useful signals (drop in AUC when shuffled, gradient boosting): taux_piece_flotte 0.117, jours_depuis_derniere 0.061, n_machine_365 0.050, age_machine 0.016.
+Most useful signals (drop in AUC when shuffled, gradient boosting): taux_piece_flotte 0.115, jours_depuis_derniere 0.067, n_machine_365 0.065, age_machine 0.019.
 
 ![Backtest](prevision.png)

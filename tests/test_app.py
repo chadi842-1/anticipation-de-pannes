@@ -146,6 +146,47 @@ def test_close_through_the_web(client):
     assert "clôturée" in page
 
 
+def test_pannes_csv_export(client):
+    client.post("/api/pannes", json=form())
+    r = client.get("/pannes.csv")
+    assert r.status_code == 200 and r.mimetype == "text/csv"
+    assert "attachment" in r.headers["Content-Disposition"] and "pannes.csv" in \
+        r.headers["Content-Disposition"]
+    body = r.get_data(as_text=True)
+    lines = body.strip().splitlines()
+    assert lines[0].startswith("panne_id,") and "motif_retard" in lines[0]
+    assert "PRS-001" in body and "Joint" in body
+
+
+def test_api_kpi(client):
+    client.post("/api/pannes", json=form(date_fin="2025-07-10T12:00"))
+    k = client.get("/api/kpi").get_json()
+    assert k["nb_pannes"] == 1
+    assert k["mttr_h"] == 3.0                                    # 09:00 -> 12:00
+    assert any(p["piece"] == "Joint" for p in k["par_piece"])
+
+
+def test_risques_csv_export(tmp_path):
+    import pandas as pd
+
+    url = f"sqlite:///{tmp_path / 'riskcsv.db'}"
+    app = create_app(url, now=clock)
+    c = app.test_client()
+    pd.DataFrame({"equipement": ["PRS-001", "CMP-002"], "type": ["Presse", "Compresseur"],
+                  "site": ["Casablanca", "Mohammedia"], "piece": ["Joint", "Filtre"],
+                  "jours_depuis_derniere": [200, 10], "jamais_vue": [1, 0],
+                  "n_piece_365": [0, 2], "proba_30j": [0.42, 0.11],
+                  "proba_taux_flotte": [0.2, 0.25], "calcule_le": [NOW, NOW]}
+                 ).to_sql("previsions_risque", get_engine(url), index=False)
+    r = c.get("/risques.csv")
+    assert r.status_code == 200 and r.mimetype == "text/csv"
+    body = r.get_data(as_text=True)
+    assert body.splitlines()[0].startswith("equipement,") and "proba_30j" in body
+    assert "PRS-001" in body and "CMP-002" in body
+    only = c.get("/risques.csv?site=Mohammedia").get_data(as_text=True)
+    assert "CMP-002" in only and "PRS-001" not in only
+
+
 def test_risk_page_empty_then_filled(tmp_path):
     import pandas as pd
 
