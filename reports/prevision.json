@@ -1,0 +1,432 @@
+{
+  "setup": {
+    "history_start": "2024-01-01",
+    "train_cutoffs": [
+      "2024-03-01",
+      "2024-04-01",
+      "2024-05-01",
+      "2024-06-01",
+      "2024-07-01",
+      "2024-08-01",
+      "2024-09-01",
+      "2024-10-01",
+      "2024-11-01",
+      "2024-12-01"
+    ],
+    "test_cutoffs": [
+      "2025-01-01",
+      "2025-02-01",
+      "2025-03-01",
+      "2025-04-01",
+      "2025-05-01"
+    ],
+    "train_rows": 4320,
+    "test_rows": 2160,
+    "train_positive_rate": 0.1387,
+    "test_positive_rate": 0.1352,
+    "horizon_days": 30,
+    "k_inspections_per_month": 20,
+    "machine_parts": 432
+  },
+  "models": {
+    "taux_flotte": {
+      "auc": 0.6603,
+      "pr_auc": 0.2097,
+      "brier": 0.11226,
+      "auc_ci95": [
+        0.6344,
+        0.6929
+      ],
+      "top20_per_month": {
+        "precision": 0.23,
+        "recall": 0.0788,
+        "failures_caught": 23,
+        "failures_total": 292,
+        "inspections": 100
+      },
+      "spare_parts": {
+        "mae_per_part_month": 1.3257,
+        "total_predicted": 281.3,
+        "total_actual": 292
+      },
+      "calibration": [
+        {
+          "predicted": 0.0404,
+          "observed": 0.0303,
+          "n": 264
+        },
+        {
+          "predicted": 0.0577,
+          "observed": 0.0795,
+          "n": 264
+        },
+        {
+          "predicted": 0.089,
+          "observed": 0.0758,
+          "n": 264
+        },
+        {
+          "predicted": 0.1157,
+          "observed": 0.125,
+          "n": 288
+        },
+        {
+          "predicted": 0.1361,
+          "observed": 0.1574,
+          "n": 216
+        },
+        {
+          "predicted": 0.1508,
+          "observed": 0.1731,
+          "n": 312
+        },
+        {
+          "predicted": 0.1831,
+          "observed": 0.1708,
+          "n": 240
+        },
+        {
+          "predicted": 0.2506,
+          "observed": 0.25,
+          "n": 312
+        }
+      ]
+    },
+    "taux_machine": {
+      "auc": 0.6867,
+      "pr_auc": 0.2723,
+      "brier": 0.10979,
+      "auc_ci95": [
+        0.6584,
+        0.714
+      ],
+      "gain_vs_taux_flotte_ci95": [
+        -0.0014,
+        0.0491
+      ],
+      "top20_per_month": {
+        "precision": 0.39,
+        "recall": 0.1336,
+        "failures_caught": 39,
+        "failures_total": 292,
+        "inspections": 100
+      },
+      "spare_parts": {
+        "mae_per_part_month": 1.3245,
+        "total_predicted": 278.0,
+        "total_actual": 292
+      },
+      "calibration": [
+        {
+          "predicted": 0.0226,
+          "observed": 0.0449,
+          "n": 267
+        },
+        {
+          "predicted": 0.0555,
+          "observed": 0.0837,
+          "n": 263
+        },
+        {
+          "predicted": 0.0774,
+          "observed": 0.0866,
+          "n": 277
+        },
+        {
+          "predicted": 0.1017,
+          "observed": 0.0824,
+          "n": 267
+        },
+        {
+          "predicted": 0.1268,
+          "observed": 0.1014,
+          "n": 276
+        },
+        {
+          "predicted": 0.1577,
+          "observed": 0.171,
+          "n": 269
+        },
+        {
+          "predicted": 0.1946,
+          "observed": 0.2037,
+          "n": 270
+        },
+        {
+          "predicted": 0.2908,
+          "observed": 0.3063,
+          "n": 271
+        }
+      ]
+    },
+    "regression_logistique": {
+      "auc": 0.7227,
+      "pr_auc": 0.2922,
+      "brier": 0.10947,
+      "auc_ci95": [
+        0.6925,
+        0.7501
+      ],
+      "gain_vs_taux_flotte_ci95": [
+        0.0249,
+        0.0935
+      ],
+      "top20_per_month": {
+        "precision": 0.42,
+        "recall": 0.1438,
+        "failures_caught": 42,
+        "failures_total": 292,
+        "inspections": 100
+      },
+      "spare_parts": {
+        "mae_per_part_month": 1.7118,
+        "total_predicted": 219.5,
+        "total_actual": 292
+      },
+      "calibration": [
+        {
+          "predicted": 0.0164,
+          "observed": 0.0222,
+          "n": 270
+        },
+        {
+          "predicted": 0.0342,
+          "observed": 0.063,
+          "n": 270
+        },
+        {
+          "predicted": 0.0467,
+          "observed": 0.063,
+          "n": 270
+        },
+        {
+          "predicted": 0.0613,
+          "observed": 0.0926,
+          "n": 270
+        },
+        {
+          "predicted": 0.0823,
+          "observed": 0.1222,
+          "n": 270
+        },
+        {
+          "predicted": 0.1112,
+          "observed": 0.1593,
+          "n": 270
+        },
+        {
+          "predicted": 0.1596,
+          "observed": 0.2444,
+          "n": 270
+        },
+        {
+          "predicted": 0.3014,
+          "observed": 0.3148,
+          "n": 270
+        }
+      ]
+    },
+    "gradient_boosting": {
+      "auc": 0.7243,
+      "pr_auc": 0.3089,
+      "brier": 0.10959,
+      "auc_ci95": [
+        0.695,
+        0.7542
+      ],
+      "gain_vs_taux_flotte_ci95": [
+        0.0345,
+        0.0916
+      ],
+      "top20_per_month": {
+        "precision": 0.41,
+        "recall": 0.1404,
+        "failures_caught": 41,
+        "failures_total": 292,
+        "inspections": 100
+      },
+      "spare_parts": {
+        "mae_per_part_month": 1.4594,
+        "total_predicted": 331.6,
+        "total_actual": 292
+      },
+      "calibration": [
+        {
+          "predicted": 0.0188,
+          "observed": 0.037,
+          "n": 270
+        },
+        {
+          "predicted": 0.0363,
+          "observed": 0.0481,
+          "n": 270
+        },
+        {
+          "predicted": 0.0562,
+          "observed": 0.063,
+          "n": 270
+        },
+        {
+          "predicted": 0.0837,
+          "observed": 0.1,
+          "n": 270
+        },
+        {
+          "predicted": 0.1184,
+          "observed": 0.1222,
+          "n": 270
+        },
+        {
+          "predicted": 0.1699,
+          "observed": 0.1407,
+          "n": 270
+        },
+        {
+          "predicted": 0.2653,
+          "observed": 0.2333,
+          "n": 270
+        },
+        {
+          "predicted": 0.4794,
+          "observed": 0.337,
+          "n": 270
+        }
+      ]
+    }
+  },
+  "feature_effects": {
+    "taux_piece_flotte": 0.1166,
+    "jours_depuis_derniere": 0.0606,
+    "n_machine_365": 0.05,
+    "age_machine": 0.0157,
+    "n_machine_90": 0.0135,
+    "n_piece_365": 0.0102,
+    "piece": 0.0087,
+    "type": 0.0066,
+    "jours_historique": 0.0,
+    "jamais_vue": -0.0005,
+    "site": -0.0018
+  },
+  "current_risk_top10": [
+    {
+      "equipement": "CNV-008",
+      "type": "Convoyeur",
+      "site": "Casablanca",
+      "piece": "Roulement",
+      "jours_depuis_derniere": 55.0,
+      "jamais_vue": 0,
+      "n_piece_365": 4,
+      "proba_30j": 0.7354740699816098,
+      "proba_taux_flotte": 0.13999981025785324,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "CNV-022",
+      "type": "Convoyeur",
+      "site": "Jorf Lasfar",
+      "piece": "Roulement",
+      "jours_depuis_derniere": 58.0,
+      "jamais_vue": 0,
+      "n_piece_365": 6,
+      "proba_30j": 0.6027534361759881,
+      "proba_taux_flotte": 0.13999981025785324,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "CNV-022",
+      "type": "Convoyeur",
+      "site": "Jorf Lasfar",
+      "piece": "Courroie",
+      "jours_depuis_derniere": 111.0,
+      "jamais_vue": 0,
+      "n_piece_365": 4,
+      "proba_30j": 0.5945388119132119,
+      "proba_taux_flotte": 0.1802957710417571,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "CNV-018",
+      "type": "Convoyeur",
+      "site": "Jorf Lasfar",
+      "piece": "Roulement",
+      "jours_depuis_derniere": 113.0,
+      "jamais_vue": 0,
+      "n_piece_365": 4,
+      "proba_30j": 0.5886976770779275,
+      "proba_taux_flotte": 0.13999981025785324,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "CMP-013",
+      "type": "Compresseur",
+      "site": "Mohammedia",
+      "piece": "Filtre",
+      "jours_depuis_derniere": 29.0,
+      "jamais_vue": 0,
+      "n_piece_365": 7,
+      "proba_30j": 0.5835124516450888,
+      "proba_taux_flotte": 0.2654527192337517,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "CNV-008",
+      "type": "Convoyeur",
+      "site": "Casablanca",
+      "piece": "Rouleau",
+      "jours_depuis_derniere": 41.0,
+      "jamais_vue": 0,
+      "n_piece_365": 7,
+      "proba_30j": 0.55177883926806,
+      "proba_taux_flotte": 0.15750655458549778,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "PRS-001",
+      "type": "Presse hydraulique",
+      "site": "Casablanca",
+      "piece": "Joint",
+      "jours_depuis_derniere": 77.0,
+      "jamais_vue": 0,
+      "n_piece_365": 10,
+      "proba_30j": 0.5433274990048981,
+      "proba_taux_flotte": 0.2688022222207884,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "PRS-016",
+      "type": "Presse hydraulique",
+      "site": "Mohammedia",
+      "piece": "Joint",
+      "jours_depuis_derniere": 96.0,
+      "jamais_vue": 0,
+      "n_piece_365": 6,
+      "proba_30j": 0.5401739062288748,
+      "proba_taux_flotte": 0.2688022222207884,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "CMP-006",
+      "type": "Compresseur",
+      "site": "Casablanca",
+      "piece": "Filtre",
+      "jours_depuis_derniere": 21.0,
+      "jamais_vue": 0,
+      "n_piece_365": 6,
+      "proba_30j": 0.5375272720811852,
+      "proba_taux_flotte": 0.2654527192337517,
+      "calcule_le": "2025-07-01"
+    },
+    {
+      "equipement": "PRS-020",
+      "type": "Presse hydraulique",
+      "site": "Jorf Lasfar",
+      "piece": "Joint",
+      "jours_depuis_derniere": 90.0,
+      "jamais_vue": 0,
+      "n_piece_365": 6,
+      "proba_30j": 0.5302539150400993,
+      "proba_taux_flotte": 0.2688022222207884,
+      "calcule_le": "2025-07-01"
+    }
+  ]
+}

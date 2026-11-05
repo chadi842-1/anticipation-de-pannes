@@ -1,107 +1,107 @@
 {
-  "nb_pannes": 1048,
-  "delai_moyen_declaration_h": 19.7937,
-  "part_declarations_tardives": 0.125,
-  "mttr_h": 5.6075,
-  "mtbf_moyen_h": 2197.9969,
-  "disponibilite_moyenne": 0.9962,
-  "disponibilite_min": 0.9891,
+  "nb_pannes": 1117,
+  "delai_moyen_declaration_h": 18.1674,
+  "part_declarations_tardives": 0.1173,
+  "mttr_h": 6.0332,
+  "mtbf_moyen_h": 2355.5019,
+  "disponibilite_moyenne": 0.9957,
+  "disponibilite_min": 0.9787,
   "par_source": {
     "excel": {
-      "n": 1048,
-      "part_tardives": 0.125
+      "n": 1117,
+      "part_tardives": 0.1173
     }
   },
   "par_piece": [
     {
       "piece": "Roulement",
-      "nb_pannes": 201,
-      "pannes_par_mois": 11.1934,
-      "mttr_h": 5.9498
+      "nb_pannes": 198,
+      "pannes_par_mois": 11.0318,
+      "mttr_h": 6.1793
     },
     {
       "piece": "Courroie",
-      "nb_pannes": 168,
-      "pannes_par_mois": 9.3557,
-      "mttr_h": 5.8768
+      "nb_pannes": 174,
+      "pannes_par_mois": 9.6946,
+      "mttr_h": 7.3282
     },
     {
       "piece": "Joint",
-      "nb_pannes": 124,
-      "pannes_par_mois": 6.9054,
-      "mttr_h": 5.6145
+      "nb_pannes": 137,
+      "pannes_par_mois": 7.6331,
+      "mttr_h": 6.6679
     },
     {
       "piece": "Filtre",
-      "nb_pannes": 117,
-      "pannes_par_mois": 6.5156,
-      "mttr_h": 5.6462
-    },
-    {
-      "piece": "Rouleau",
-      "nb_pannes": 70,
-      "pannes_par_mois": 3.8982,
-      "mttr_h": 5.5814
+      "nb_pannes": 135,
+      "pannes_par_mois": 7.5217,
+      "mttr_h": 5.0881
     },
     {
       "piece": "Garniture mécanique",
-      "nb_pannes": 69,
-      "pannes_par_mois": 3.8425,
-      "mttr_h": 5.1203
+      "nb_pannes": 85,
+      "pannes_par_mois": 4.7359,
+      "mttr_h": 4.2918
     },
     {
-      "piece": "Capteur de pression",
-      "nb_pannes": 51,
-      "pannes_par_mois": 2.8401,
-      "mttr_h": 5.6471
+      "piece": "Rouleau",
+      "nb_pannes": 75,
+      "pannes_par_mois": 4.1787,
+      "mttr_h": 4.508
     },
     {
       "piece": "Frein",
-      "nb_pannes": 50,
-      "pannes_par_mois": 2.7844,
-      "mttr_h": 5.026
+      "nb_pannes": 57,
+      "pannes_par_mois": 3.1758,
+      "mttr_h": 7.1772
+    },
+    {
+      "piece": "Capteur de pression",
+      "nb_pannes": 56,
+      "pannes_par_mois": 3.1201,
+      "mttr_h": 5.3054
     },
     {
       "piece": "Vérin hydraulique",
-      "nb_pannes": 45,
-      "pannes_par_mois": 2.506,
-      "mttr_h": 5.0978
-    },
-    {
-      "piece": "Clapet",
-      "nb_pannes": 42,
-      "pannes_par_mois": 2.3389,
-      "mttr_h": 5.4048
+      "nb_pannes": 48,
+      "pannes_par_mois": 2.6744,
+      "mttr_h": 6.1229
     },
     {
       "piece": "Câble",
-      "nb_pannes": 32,
-      "pannes_par_mois": 1.782,
-      "mttr_h": 4.0094
+      "nb_pannes": 39,
+      "pannes_par_mois": 2.1729,
+      "mttr_h": 5.2205
     },
     {
-      "piece": "Pompe hydraulique",
-      "nb_pannes": 27,
-      "pannes_par_mois": 1.5036,
-      "mttr_h": 4.7519
+      "piece": "Clapet",
+      "nb_pannes": 32,
+      "pannes_par_mois": 1.7829,
+      "mttr_h": 7.7469
     },
     {
       "piece": "Moteur",
-      "nb_pannes": 20,
-      "pannes_par_mois": 1.1138,
-      "mttr_h": 7.04
+      "nb_pannes": 26,
+      "pannes_par_mois": 1.4486,
+      "mttr_h": 5.0923
+    },
+    {
+      "piece": "Pompe hydraulique",
+      "nb_pannes": 25,
+      "pannes_par_mois": 1.3929,
+      "mttr_h": 7.96
     },
     {
       "piece": "Moteur de levage",
-      "nb_pannes": 19,
-      "pannes_par_mois": 1.0581,
-      "mttr_h": 4.4368
+      "nb_pannes": 18,
+      "pannes_par_mois": 1.0029,
+      "mttr_h": 5.1556
     },
     {
       "piece": "Turbine",
-      "nb_pannes": 13,
-      "pannes_par_mois": 0.724,
-      "mttr_h": 8.8692
+      "nb_pannes": 12,
+      "pannes_par_mois": 0.6686,
+      "mttr_h": 5.1167
     }
   ]
 }
