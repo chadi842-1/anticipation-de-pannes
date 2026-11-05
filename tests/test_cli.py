@@ -34,3 +34,11 @@ def test_subcommands_have_help(capsys):
         with pytest.raises(SystemExit) as e:
             main([sub, "--help"])
         assert e.value.code == 0
+
+
+def test_python_m_pannes_entrypoint():
+    import subprocess
+    import sys
+
+    r = subprocess.run([sys.executable, "-m", "pannes", "--help"], capture_output=True, text=True)
+    assert r.returncode == 0 and "usage: pannes" in r.stdout
