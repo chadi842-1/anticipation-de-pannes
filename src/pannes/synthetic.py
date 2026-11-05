@@ -22,6 +22,7 @@ log-normal with a share of late (> 24 h) declarations, which the Flask app is me
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
@@ -174,7 +175,10 @@ def _corrupt(rec: dict, kind: str, rng, eq_codes: set[str]) -> dict:
         else:
             r["date_fin"] = r["date_panne"] - timedelta(hours=float(rng.uniform(1, 48)))
     elif kind == "date_future":
-        shift = timedelta(days=float(rng.uniform(40, 400)))
+        # truly after the extraction date (typically a year typo: 2026 instead of 2024)
+        target = EXTRACTION_DATE + timedelta(days=int(rng.integers(10, 300)),
+                                             minutes=int(rng.integers(0, 1440)))
+        shift = target - r["date_panne"]
         r["date_panne"] += shift
         r["date_declaration"] += shift
         r["date_fin"] += shift
@@ -236,6 +240,10 @@ def generate(paths: Paths, seed: int = SEED, per_type_site: int = 4,
             files.append(name)
 
     rows_df = pd.DataFrame(rows)
+    # an export manifest, as a real data drop would carry: the date the files were extracted
+    (paths.inbox / "manifest.json").write_text(
+        json.dumps({"extraction_date": EXTRACTION_DATE.date().isoformat(), "files": files},
+                   indent=2))
     pannes.to_parquet(paths.truth / "pannes.parquet", index=False)
     rows_df.to_parquet(paths.truth / "rows.parquet", index=False)
     return SyntheticRun(eq, pannes, rows_df, files)
