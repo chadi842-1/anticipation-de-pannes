@@ -1,0 +1,107 @@
+{
+  "nb_pannes": 1048,
+  "delai_moyen_declaration_h": 19.7937,
+  "part_declarations_tardives": 0.125,
+  "mttr_h": 5.6075,
+  "mtbf_moyen_h": 2197.9969,
+  "disponibilite_moyenne": 0.9962,
+  "disponibilite_min": 0.9891,
+  "par_source": {
+    "excel": {
+      "n": 1048,
+      "part_tardives": 0.125
+    }
+  },
+  "par_piece": [
+    {
+      "piece": "Roulement",
+      "nb_pannes": 201,
+      "pannes_par_mois": 11.1934,
+      "mttr_h": 5.9498
+    },
+    {
+      "piece": "Courroie",
+      "nb_pannes": 168,
+      "pannes_par_mois": 9.3557,
+      "mttr_h": 5.8768
+    },
+    {
+      "piece": "Joint",
+      "nb_pannes": 124,
+      "pannes_par_mois": 6.9054,
+      "mttr_h": 5.6145
+    },
+    {
+      "piece": "Filtre",
+      "nb_pannes": 117,
+      "pannes_par_mois": 6.5156,
+      "mttr_h": 5.6462
+    },
+    {
+      "piece": "Rouleau",
+      "nb_pannes": 70,
+      "pannes_par_mois": 3.8982,
+      "mttr_h": 5.5814
+    },
+    {
+      "piece": "Garniture mécanique",
+      "nb_pannes": 69,
+      "pannes_par_mois": 3.8425,
+      "mttr_h": 5.1203
+    },
+    {
+      "piece": "Capteur de pression",
+      "nb_pannes": 51,
+      "pannes_par_mois": 2.8401,
+      "mttr_h": 5.6471
+    },
+    {
+      "piece": "Frein",
+      "nb_pannes": 50,
+      "pannes_par_mois": 2.7844,
+      "mttr_h": 5.026
+    },
+    {
+      "piece": "Vérin hydraulique",
+      "nb_pannes": 45,
+      "pannes_par_mois": 2.506,
+      "mttr_h": 5.0978
+    },
+    {
+      "piece": "Clapet",
+      "nb_pannes": 42,
+      "pannes_par_mois": 2.3389,
+      "mttr_h": 5.4048
+    },
+    {
+      "piece": "Câble",
+      "nb_pannes": 32,
+      "pannes_par_mois": 1.782,
+      "mttr_h": 4.0094
+    },
+    {
+      "piece": "Pompe hydraulique",
+      "nb_pannes": 27,
+      "pannes_par_mois": 1.5036,
+      "mttr_h": 4.7519
+    },
+    {
+      "piece": "Moteur",
+      "nb_pannes": 20,
+      "pannes_par_mois": 1.1138,
+      "mttr_h": 7.04
+    },
+    {
+      "piece": "Moteur de levage",
+      "nb_pannes": 19,
+      "pannes_par_mois": 1.0581,
+      "mttr_h": 4.4368
+    },
+    {
+      "piece": "Turbine",
+      "nb_pannes": 13,
+      "pannes_par_mois": 0.724,
+      "mttr_h": 8.8692
+    }
+  ]
+}
