@@ -74,6 +74,7 @@ CREATE TABLE pannes (
 	gravite VARCHAR(10) NULL, 
 	technicien NVARCHAR(100) NULL, 
 	commentaire NVARCHAR(500) NULL, 
+	motif_retard NVARCHAR(300) NULL, 
 	source VARCHAR(10) NOT NULL, 
 	source_file NVARCHAR(200) NULL, 
 	source_row INTEGER NULL, 

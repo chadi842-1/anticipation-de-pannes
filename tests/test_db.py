@@ -130,3 +130,14 @@ def test_committed_sqlserver_ddl_is_up_to_date():
     for needle in ("IDENTITY", "NVARCHAR", "CONSTRAINT uq_panne UNIQUE",
                    "CONSTRAINT ck_declaration_apres_panne CHECK", "FOREIGN KEY"):
         assert needle in committed, needle
+
+
+def test_old_database_gets_new_nullable_columns(tmp_path):
+    from pannes.db import migrate_add_columns
+
+    e = get_engine(f"sqlite:///{tmp_path / 'old.db'}")
+    init_db(e)
+    with e.begin() as c:                            # simulate a database from before motif_retard
+        c.execute(text("alter table pannes drop column motif_retard"))
+    assert migrate_add_columns(e) == ["pannes.motif_retard"]
+    assert migrate_add_columns(e) == []             # idempotent

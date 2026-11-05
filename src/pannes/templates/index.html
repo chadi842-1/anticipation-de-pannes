@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Déclaration des pannes</title>
+  <style>
+    :root { --ink:#0b0b0b; --ink2:#52514e; --line:#e4e3df; --bg:#fcfcfb; --accent:#2a78d6;
+            --err:#b42318; --ok:#067647; --warn:#9a6700; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+           color: var(--ink); background: var(--bg); }
+    main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    p.sub { color: var(--ink2); margin: 0 0 20px; }
+    form.decl { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 12px 16px; padding: 16px; border: 1px solid var(--line); border-radius: 10px;
+                background: #fff; }
+    label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink2); }
+    input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid #cfcdc8;
+                              border-radius: 6px; background: #fff; color: var(--ink); }
+    .full { grid-column: 1 / -1; }
+    button { font: inherit; padding: 9px 16px; border: 0; border-radius: 6px;
+             background: var(--accent); color: #fff; cursor: pointer; }
+    .msg { padding: 10px 12px; border-radius: 6px; margin: 0 0 8px; }
+    .msg.error { background: #fef3f2; color: var(--err); }
+    .msg.ok { background: #ecfdf3; color: var(--ok); }
+    .hint { font-size: 12px; color: var(--warn); }
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+    th { color: var(--ink2); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    .tag { font-size: 12px; padding: 1px 6px; border-radius: 4px; background: #f2f1ee; }
+    .tag.late { background: #fffaeb; color: var(--warn); }
+    .close-form { display: flex; gap: 6px; }
+    .close-form input { padding: 4px 6px; font-size: 13px; }
+    .close-form button { padding: 4px 10px; font-size: 13px; }
+    .scroll { overflow-x: auto; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Déclaration des pannes</h1>
+  <p class="sub">L'heure de déclaration est celle du serveur. Une panne survenue il y a plus de
+    {{ late_hours|int }} h demande un motif de retard.</p>
+
+  {% for cat, m in get_flashed_messages(with_categories=true) %}
+    <div class="msg {{ cat }}">{{ m }}</div>
+  {% endfor %}
+
+  <form class="decl" method="post" action="{{ url_for('declarer') }}">
+    <label>Équipement
+      <select name="equipement" required>
+        <option value="">—</option>
+        {% for e in ref.equipements %}
+          <option value="{{ e.code }}" {% if form.get('equipement') == e.code %}selected{% endif %}>
+            {{ e.code }} · {{ e.designation }} ({{ e.site }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Pièce
+      <select name="piece" required>
+        <option value="">—</option>
+        {% for p in ref.pieces %}
+          <option {% if form.get('piece') == p %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Date et heure de la panne
+      <input type="datetime-local" name="date_panne" max="{{ now }}" required
+             value="{{ form.get('date_panne', '') }}">
+    </label>
+    <label>Gravité
+      <select name="gravite">
+        {% for g in ref.gravites %}
+          <option {% if form.get('gravite') == g %}selected{% endif %}>{{ g }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Fin de réparation (si déjà réparée)
+      <input type="datetime-local" name="date_fin" max="{{ now }}"
+             value="{{ form.get('date_fin', '') }}">
+    </label>
+    <label>Technicien
+      <input name="technicien" value="{{ form.get('technicien', '') }}">
+    </label>
+    <label class="full">Motif du retard <span class="hint">obligatoire si la panne date de plus de {{ late_hours|int }} h</span>
+      <input name="motif_retard" value="{{ form.get('motif_retard', '') }}">
+    </label>
+    <label class="full">Commentaire
+      <textarea name="commentaire" rows="2">{{ form.get('commentaire', '') }}</textarea>
+    </label>
+    <div class="full"><button type="submit">Déclarer la panne</button></div>
+  </form>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>N°</th><th>Équipement</th><th>Pièce</th><th>Panne</th><th>Déclarée</th>
+      <th>Fin</th><th>Gravité</th><th>Source</th></tr></thead>
+    <tbody>
+    {% for p in pannes %}
+      <tr>
+        <td>{{ p.panne_id }}</td><td>{{ p.code }}</td><td>{{ p.piece }}</td>
+        <td>{{ p.date_panne.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ p.date_declaration.strftime('%d/%m/%Y %H:%M') if p.date_declaration else '—' }}
+          {% if p.motif_retard %}<span class="tag late" title="{{ p.motif_retard }}">retard</span>{% endif %}</td>
+        <td>
+          {% if p.date_fin %}{{ p.date_fin.strftime('%d/%m/%Y %H:%M') }}
+          {% else %}
+            <form class="close-form" method="post" action="{{ url_for('cloturer', panne_id=p.panne_id) }}">
+              <input type="datetime-local" name="date_fin" max="{{ now }}" required>
+              <button type="submit">Clôturer</button>
+            </form>
+          {% endif %}
+        </td>
+        <td>{{ p.gravite or '—' }}</td><td><span class="tag">{{ p.source }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</main>
+</body>
+</html>

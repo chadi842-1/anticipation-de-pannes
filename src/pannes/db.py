@@ -76,6 +76,7 @@ pannes = Table(
     Column("gravite", String(10)),
     Column("technicien", Unicode(100)),
     Column("commentaire", Unicode(500)),
+    Column("motif_retard", Unicode(300)),                     # required by the app if > 24 h
     Column("source", String(10), nullable=False),           # 'excel' or 'app'
     Column("source_file", Unicode(200)),
     Column("source_row", Integer),
@@ -131,11 +132,36 @@ def get_engine(url: str) -> Engine:
 
 def init_db(engine: Engine) -> None:
     metadata.create_all(engine)
+    migrate_add_columns(engine)
     with engine.begin() as con:
         known = {r[0] for r in con.execute(select(pieces.c.nom))}
         new = [{"nom": p} for p in PARTS if p not in known]
         if new:
             con.execute(pieces.insert(), new)
+
+
+def migrate_add_columns(engine: Engine) -> list[str]:
+    """Minimal forward migration: add nullable columns that exist in the model but not yet in
+    an older database (create_all never alters existing tables). Anything beyond that, such as a
+    new NOT NULL column or a changed constraint, needs a real migration tool (Alembic)."""
+    from sqlalchemy import inspect
+
+    insp = inspect(engine)
+    added = []
+    with engine.begin() as con:
+        for table in metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue
+            have = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name in have:
+                    continue
+                if not col.nullable:
+                    raise RuntimeError(f"{table.name}.{col.name} is NOT NULL: migrate by hand")
+                ctype = col.type.compile(dialect=engine.dialect)
+                con.execute(text(f"ALTER TABLE {table.name} ADD {col.name} {ctype}"))
+                added.append(f"{table.name}.{col.name}")
+    return added
 
 
 def sqlserver_ddl() -> str:
