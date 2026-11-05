@@ -1,17 +1,51 @@
 """Flask app for declaring breakdowns.  Run:  flask --app pannes.app run   (or `pannes serve`)
 
-Pages: GET / (form + latest breakdowns), POST /declarer, POST /pannes/<id>/cloturer.
-JSON:  GET /api/pannes, POST /api/pannes (same rules as the form), GET /health.
+Pages: GET / (form + latest breakdowns), POST /declarer, POST /pannes/<id>/cloturer,
+       GET /risques (ranked 30-day risk, filterable by site).
+CSV:   GET /pannes.csv (recent breakdowns), GET /risques.csv (risk list, honours ?site=).
+JSON:  GET /api/pannes, POST /api/pannes (same rules as the form), GET /api/kpi, GET /health.
 """
 from __future__ import annotations
 
+import csv
+import io
 from datetime import datetime
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
+from flask import Flask, Response, flash, jsonify, redirect, render_template, request, url_for
 
 from .config import LATE_DECLARATION_HOURS, get_paths
 from .db import get_engine, init_db
 from .declarations import close, declare, recent, reference_lists
+
+HIGH_RISK = 0.25     # threshold flagged in the risk list and its summary
+
+
+def _csv_response(header: list[str], rows, filename: str) -> Response:
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(header)
+    w.writerows(rows)
+    return Response(buf.getvalue(), mimetype="text/csv; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
+def _risk_query(engine, site: str):
+    """(sites, rows) for the risk list; rows filtered to `site` when it is a known site."""
+    from sqlalchemy import inspect, text
+
+    if not inspect(engine).has_table("previsions_risque"):
+        return [], []
+    with engine.connect() as c:
+        sites = [r[0] for r in c.execute(text(
+            "select distinct site from previsions_risque order by site"))]
+        q = "select * from previsions_risque"
+        params = {}
+        if site in sites:
+            q += " where site = :site"
+            params["site"] = site
+        rows = c.execute(text(q + " order by proba_30j desc limit 200"),
+                         params).mappings().all()
+    return sites, rows
 
 
 def create_app(database_url: str | None = None, now=None) -> Flask:
@@ -57,23 +91,33 @@ def create_app(database_url: str | None = None, now=None) -> Flask:
 
     @app.get("/risques")
     def risques():
-        from sqlalchemy import inspect, text
-
-        if not inspect(engine).has_table("previsions_risque"):
-            return render_template("risques.html", rows=[], sites=[], site="", asof="")
         site = request.args.get("site", "")
-        with engine.connect() as c:
-            sites = [r[0] for r in c.execute(text(
-                "select distinct site from previsions_risque order by site"))]
-            q = "select * from previsions_risque"
-            params = {}
-            if site in sites:
-                q += " where site = :site"
-                params["site"] = site
-            rows = c.execute(text(q + " order by proba_30j desc limit 40"),
-                             params).mappings().all()
+        sites, rows = _risk_query(engine, site)
+        n_high = sum(1 for r in rows if r["proba_30j"] >= HIGH_RISK)
         asof = str(rows[0]["calcule_le"])[:10] if rows else ""
-        return render_template("risques.html", rows=rows, sites=sites, site=site, asof=asof)
+        return render_template("risques.html", rows=rows[:40], sites=sites, site=site,
+                               asof=asof, n_high=n_high)
+
+    @app.get("/risques.csv")
+    def export_risques():
+        cols = ["equipement", "type", "site", "piece", "jours_depuis_derniere", "jamais_vue",
+                "n_piece_365", "proba_30j", "proba_taux_flotte", "calcule_le"]
+        _, rows = _risk_query(engine, request.args.get("site", ""))
+        return _csv_response(cols, ([r[c] for c in cols] for r in rows), "risques.csv")
+
+    @app.get("/pannes.csv")
+    def export_pannes():
+        cols = ["panne_id", "code", "piece", "date_panne", "date_declaration", "date_fin",
+                "gravite", "source", "motif_retard"]
+        rows = recent(engine, limit=10000)
+        return _csv_response(cols, ([r.get(c) for c in cols] for r in rows), "pannes.csv")
+
+    @app.get("/api/kpi")
+    def api_kpi():
+        from .kpi import create_views, kpi_summary
+
+        create_views(engine)
+        return jsonify(kpi_summary(engine))
 
     @app.get("/api/pannes")
     def api_list():
