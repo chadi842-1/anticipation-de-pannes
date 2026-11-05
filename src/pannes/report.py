@@ -56,7 +56,8 @@ def render_results(r: dict, kpi: dict, prev: dict | None = None) -> str:
 
 NAMES = {"taux_flotte": "Fleet rate per part (baseline)",
          "taux_machine": "Machine-part own rate",
-         "regression_logistique": "Logistic regression", "gradient_boosting": "Gradient boosting"}
+         "regression_logistique": "Logistic regression",
+         "gradient_boosting": "Gradient boosting (calibrated)"}
 
 
 def _prevision_section(p: dict) -> list[str]:

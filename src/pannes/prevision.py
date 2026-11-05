@@ -31,6 +31,8 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -142,14 +144,23 @@ def make_logistic() -> Pipeline:
     return Pipeline([("pre", pre), ("clf", LogisticRegression(C=0.5, max_iter=3000))])
 
 
-def make_gbm(seed: int = SEED) -> Pipeline:
+def make_gbm(seed: int = SEED, calibrate: bool = True) -> BaseEstimator:
+    """Gradient boosting on the features. By default wrapped in isotonic calibration with 5-fold
+    cross-validation on the training set (CalibratedClassifierCV). The raw GBM over-states the
+    risk of the top machine-parts, so its probabilities are not safe to read as such; isotonic
+    regression brings the calibration curve back to the diagonal and lowers the Brier score. The
+    5-fold scheme averages five models, which on this data also nudges the ranking (AUC, top-K)
+    up a little as a side effect. Pass calibrate=False for the raw single model."""
     pre = ColumnTransformer([
         ("num", "passthrough", NUM),
         ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), CAT),
     ])
-    return Pipeline([("pre", pre), ("clf", HistGradientBoostingClassifier(
+    gbm = Pipeline([("pre", pre), ("clf", HistGradientBoostingClassifier(
         max_iter=250, learning_rate=0.05, max_leaf_nodes=15, min_samples_leaf=40,
         l2_regularization=1.0, random_state=seed))])
+    if not calibrate:
+        return gbm
+    return CalibratedClassifierCV(gbm, method="isotonic", cv=5)
 
 
 def predict_all(train: pd.DataFrame, test: pd.DataFrame, seed: int = SEED) -> dict:
@@ -320,7 +331,7 @@ def plot_backtest(res: BacktestResult, out_path) -> None:
     colors = dict(zip(MODELS, [INK_2, AQUA, BLUE, ORANGE], strict=True))
     labels = {"taux_flotte": "Fleet rate per part", "taux_machine": "Machine-part own rate",
               "regression_logistique": "Logistic regression",
-              "gradient_boosting": "Gradient boosting"}
+              "gradient_boosting": "Gradient boosting (calibrated)"}
     del YELLOW
     plt.rcParams.update({
         "figure.facecolor": SURFACE, "axes.facecolor": SURFACE, "savefig.facecolor": SURFACE,
