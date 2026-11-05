@@ -6,7 +6,7 @@ def _pct(x: float, d: int = 1) -> str:
     return f"{x * 100:.{d}f} %"
 
 
-def render_results(r: dict, kpi: dict) -> str:
+def render_results(r: dict, kpi: dict, prev: dict | None = None) -> str:
     g, l1, l2, noop = r["generated"], r["load_2024"], r["load_2025"], r["reload_unchanged"]
     st, sc = r["cleaning_stats"], r["cleaning_vs_truth"]
     L = ["# Results", "",
@@ -49,4 +49,37 @@ def render_results(r: dict, kpi: dict) -> str:
     L += ["", "![KPIs](kpi.png)", "",
           "These views are what a Power BI report would connect to; no Power BI report is built "
           "here.", ""]
+    if prev:
+        L += _prevision_section(prev)
     return "\n".join(L)
+
+
+NAMES = {"taux_flotte": "Fleet rate per part (baseline)",
+         "taux_machine": "Machine-part own rate",
+         "regression_logistique": "Logistic regression", "gradient_boosting": "Gradient boosting"}
+
+
+def _prevision_section(p: dict) -> list[str]:
+    s = p["setup"]
+    k = s["k_inspections_per_month"]
+    L = ["## Predictive maintenance: failure within 30 days", "",
+         f"{s['machine_parts']} machine-parts scored on the 1st of each month. Trained on "
+         f"{len(s['train_cutoffs'])} monthly cutoffs of 2024 ({s['train_rows']:,} rows), tested "
+         f"once on {len(s['test_cutoffs'])} cutoffs of 2025 ({s['test_rows']:,} rows); "
+         f"{_pct(s['test_positive_rate'])} of test machine-parts fail within 30 days. Intervals: "
+         "bootstrap over machines.", "",
+         f"| Model | AUC [95 % CI] | AUC gain vs baseline [95 % CI] | PR-AUC | Brier | "
+         f"Top-{k}/month: hits | Spare parts MAE |", "|---|---|---|---|---|---|---|"]
+    for name, m in p["models"].items():
+        g = m.get("gain_vs_taux_flotte_ci95")
+        gain = f"[{g[0]:+.3f}, {g[1]:+.3f}]" if g else "baseline"
+        t = m[f"top{k}_per_month"]
+        L.append(f"| {NAMES[name]} | {m['auc']:.3f} [{m['auc_ci95'][0]:.3f}, "
+                 f"{m['auc_ci95'][1]:.3f}] | {gain} | {m['pr_auc']:.3f} | {m['brier']:.4f} | "
+                 f"{t['failures_caught']}/{t['inspections']} ({_pct(t['precision'], 0)}) | "
+                 f"{m['spare_parts']['mae_per_part_month']:.2f} |")
+    fe = list(p["feature_effects"].items())[:4]
+    L += ["", "Most useful signals (drop in AUC when shuffled, gradient boosting): "
+          + ", ".join(f"{a} {b:.3f}" for a, b in fe) + ".", "",
+          "![Backtest](prevision.png)", ""]
+    return L

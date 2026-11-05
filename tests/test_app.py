@@ -144,3 +144,23 @@ def test_close_through_the_web(client):
     page = client.post(f"/pannes/{pid}/cloturer", data={"date_fin": "2025-07-10T12:00"},
                        follow_redirects=True).get_data(as_text=True)
     assert "clôturée" in page
+
+
+def test_risk_page_empty_then_filled(tmp_path):
+    import pandas as pd
+
+    url = f"sqlite:///{tmp_path / 'risk.db'}"
+    app = create_app(url, now=clock)
+    c = app.test_client()
+    assert "pannes predict" in c.get("/risques").get_data(as_text=True)
+    risk = pd.DataFrame({"equipement": ["PRS-001", "CMP-002"], "type": ["Presse", "Compresseur"],
+                         "site": ["Casablanca", "Mohammedia"], "piece": ["Joint", "Filtre"],
+                         "jours_depuis_derniere": [200, 10], "jamais_vue": [1, 0],
+                         "n_piece_365": [0, 2], "proba_30j": [0.42, 0.11],
+                         "proba_taux_flotte": [0.2, 0.25], "calcule_le": [NOW, NOW]})
+    risk.to_sql("previsions_risque", get_engine(url), index=False)
+    html = c.get("/risques").get_data(as_text=True)
+    assert html.index("PRS-001") < html.index("CMP-002") and "42 %" in html
+    only = c.get("/risques?site=Mohammedia").get_data(as_text=True)
+    assert "CMP-002" in only and "PRS-001" not in only
+    assert "PRS-001" in c.get("/risques?site=hack' or 1=1").get_data(as_text=True)  # ignored

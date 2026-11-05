@@ -55,6 +55,26 @@ def create_app(database_url: str | None = None, now=None) -> Flask:
               "ok" if res.ok else "error")
         return redirect(url_for("index"))
 
+    @app.get("/risques")
+    def risques():
+        from sqlalchemy import inspect, text
+
+        if not inspect(engine).has_table("previsions_risque"):
+            return render_template("risques.html", rows=[], sites=[], site="", asof="")
+        site = request.args.get("site", "")
+        with engine.connect() as c:
+            sites = [r[0] for r in c.execute(text(
+                "select distinct site from previsions_risque order by site"))]
+            q = "select * from previsions_risque"
+            params = {}
+            if site in sites:
+                q += " where site = :site"
+                params["site"] = site
+            rows = c.execute(text(q + " order by proba_30j desc limit 40"),
+                             params).mappings().all()
+        asof = str(rows[0]["calcule_le"])[:10] if rows else ""
+        return render_template("risques.html", rows=rows, sites=sites, site=site, asof=asof)
+
     @app.get("/api/pannes")
     def api_list():
         limit = min(int(request.args.get("limit", 20)), 200)

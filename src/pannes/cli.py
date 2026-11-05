@@ -3,6 +3,7 @@
     pannes generate [--per-type-site N]   synthetic Excel files into inbox/
     pannes load                           incremental load of inbox/ (new or changed files only)
     pannes kpi                            create the KPI views, write reports/kpi.json + figure
+    pannes predict                        backtest the 30-day risk models, score current risk
     pannes ddl                            write sql/sqlserver/{schema,views}.sql
     pannes serve [--port P]               Flask declaration app
     pannes run [--per-type-site N]        demo: 2024 files, then 2025 files arrive, then reports
@@ -46,6 +47,22 @@ def cmd_kpi(paths: Paths) -> dict:
     return summary
 
 
+def cmd_predict(paths: Paths, n_boot: int = 500) -> dict:
+    from .db import get_engine
+    from .prevision import backtest, current_risk, plot_backtest, write_risk
+
+    eng = get_engine(paths.database_url())
+    bt = backtest(eng, n_boot=n_boot)
+    plot_backtest(bt, paths.reports / "prevision.png")
+    risk = current_risk(eng)
+    write_risk(eng, risk)
+    out = {**bt.metrics, "current_risk_top10": risk.head(10).assign(
+        calcule_le=risk["calcule_le"].astype(str)).to_dict("records")}
+    (paths.reports / "prevision.json").write_text(
+        json.dumps(out, indent=2, ensure_ascii=False, default=str))
+    return out
+
+
 def cmd_ddl(out_dir: Path = ROOT / "sql" / "sqlserver") -> list[str]:
     from .db import sqlserver_ddl
     from .kpi import sqlserver_views
@@ -65,23 +82,25 @@ def cmd_run(paths: Paths, per_type_site: int, seed: int) -> None:
     for d in (paths.inbox, paths.data):
         shutil.rmtree(d, ignore_errors=True)
     paths.ensure()
-    print("[1/5] generate", flush=True)
+    print("[1/6] generate", flush=True)
     gen = cmd_generate(paths, per_type_site, seed)
     hold = paths.data / "_arrivals"
     hold.mkdir(parents=True, exist_ok=True)
     later = sorted(paths.inbox.glob("pannes_*2025*.xlsx"))
     for f in later:
         shutil.move(f, hold / f.name)
-    print("[2/5] load 2024 files", flush=True)
+    print("[2/6] load 2024 files", flush=True)
     first = cmd_load(paths)
-    print("[3/5] reload with nothing new, then 2025 files arrive", flush=True)
+    print("[3/6] reload with nothing new, then 2025 files arrive", flush=True)
     noop = cmd_load(paths)
     for f in later:
         shutil.move(hold / f.name, paths.inbox / f.name)
     second = cmd_load(paths)
-    print("[4/5] KPIs", flush=True)
+    print("[4/6] KPIs", flush=True)
     kpi = cmd_kpi(paths)
-    print("[5/5] report", flush=True)
+    print("[5/6] predictive maintenance backtest", flush=True)
+    prev = cmd_predict(paths)
+    print("[6/6] report", flush=True)
     # score the cleaning rules against the generator's labels (synthetic data only)
     files = sorted(paths.inbox.glob("pannes_*.xlsx"))
     res = clean_files(files, read_register(paths.inbox / "referentiel_equipements.xlsx"),
@@ -95,7 +114,8 @@ def cmd_run(paths: Paths, per_type_site: int, seed: int) -> None:
         json.dumps(report, indent=2, ensure_ascii=False, default=str))
     from .report import render_results
 
-    (paths.reports / "results.md").write_text(render_results(report, kpi), encoding="utf-8")
+    (paths.reports / "results.md").write_text(render_results(report, kpi, prev),
+                                              encoding="utf-8")
     print(f"done: {paths.reports / 'results.md'}")
 
 
@@ -108,7 +128,7 @@ def main(argv: list[str] | None = None) -> None:
         p.add_argument("--per-type-site", type=int, default=8,
                        help="machines per equipment type and site (5 types x 3 sites)")
         p.add_argument("--seed", type=int, default=SEED)
-    for name in ("load", "kpi", "ddl"):
+    for name in ("load", "kpi", "ddl", "predict"):
         sub.add_parser(name)
     p = sub.add_parser("serve")
     p.add_argument("--port", type=int, default=5000)
@@ -124,6 +144,8 @@ def main(argv: list[str] | None = None) -> None:
         return
     out = {"generate": lambda: cmd_generate(paths, a.per_type_site, a.seed),
            "load": lambda: cmd_load(paths), "kpi": lambda: cmd_kpi(paths),
+           "predict": lambda: {k: v for k, v in cmd_predict(paths).items()
+                               if k in ("setup", "current_risk_top10")},
            "ddl": lambda: cmd_ddl()}[a.cmd]()
     print(json.dumps(out, indent=2, ensure_ascii=False, default=str))
 

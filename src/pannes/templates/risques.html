@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Risque de panne</title>
+  <style>
+    :root { --ink:#0b0b0b; --ink2:#52514e; --line:#e4e3df; --bg:#fcfcfb; --accent:#2a78d6;
+            --hi:#b42318; --mid:#9a6700; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+           color: var(--ink); background: var(--bg); }
+    main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    p.sub { color: var(--ink2); margin: 0 0 16px; }
+    nav a { color: var(--accent); text-decoration: none; margin-right: 12px; font-size: 14px; }
+    form { display: flex; gap: 8px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
+    select, button { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid #cfcdc8;
+                     background: #fff; }
+    button { background: var(--accent); color: #fff; border: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+    th { color: var(--ink2); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .bar { position: relative; height: 8px; background: #f2f1ee; border-radius: 4px; min-width: 80px; }
+    .bar span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--accent); }
+    .empty { padding: 16px; border: 1px dashed var(--line); border-radius: 8px; color: var(--ink2); }
+    .scroll { overflow-x: auto; }
+    .note { font-size: 13px; color: var(--ink2); margin-top: 16px; }
+  </style>
+</head>
+<body>
+<main>
+  <nav><a href="{{ url_for('index') }}">← Déclarer une panne</a></nav>
+  <h1>Risque de panne dans les 30 prochains jours</h1>
+  {% if rows %}
+  <p class="sub">Calculé le {{ asof }} par un modèle de gradient boosting entraîné sur l'historique
+    des pannes. À comparer avec le taux moyen de la pièce sur le parc.</p>
+  <form method="get">
+    <label>Site
+      <select name="site">
+        <option value="">Tous</option>
+        {% for s in sites %}<option {% if s == site %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+    </label>
+    <button type="submit">Filtrer</button>
+  </form>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Équipement</th><th>Pièce</th><th>Site</th><th class="num">Jours depuis la dernière panne</th>
+      <th class="num">Risque 30 j</th><th></th><th class="num">Taux moyen pièce</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ r.equipement }}</td><td>{{ r.piece }}</td><td>{{ r.site }}</td>
+        <td class="num">{{ r.jours_depuis_derniere|int }}{% if r.jamais_vue %}+{% endif %}</td>
+        <td class="num">{{ '%.0f'|format(r.proba_30j * 100) }} %</td>
+        <td><div class="bar"><span style="width: {{ (r.proba_30j * 100)|round(1) }}%"></span></div></td>
+        <td class="num">{{ '%.0f'|format(r.proba_taux_flotte * 100) }} %</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="note">« + » : aucune panne de cette pièce depuis le début de l'historique. La
+    qualité de ces scores est mesurée par un backtest sur 2025 (voir reports/results.md).</p>
+  {% else %}
+  <div class="empty">Aucune prévision disponible. Lancez <code>pannes predict</code>.</div>
+  {% endif %}
+</main>
+</body>
+</html>
