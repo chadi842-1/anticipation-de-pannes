@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import numpy as np
 import openpyxl
 import pandas as pd
 import pytest
@@ -71,3 +72,26 @@ def test_reproducible(tmp_path):
     a = generate(get_paths(tmp_path / "a"), seed=9)
     b = generate(get_paths(tmp_path / "b"), seed=9)
     pd.testing.assert_frame_equal(a.rows, b.rows)
+
+
+def test_wear_out_process_matches_target_rates_and_shapes():
+    import numpy as np
+
+    from pannes.synthetic import PART_RATE, PART_SHAPE, part_failure_times
+
+    rng = np.random.default_rng(0)
+    for part in ("Roulement", "Capteur de pression"):
+        n = np.mean([len(part_failure_times(PART_RATE[part], PART_SHAPE[part], rng))
+                     for _ in range(2000)])
+        assert abs(n - PART_RATE[part] * 547 / 365) < 0.15, part
+    # wear-out: intervals of a high-shape part are far less dispersed than exponential ones
+    gaps = np.diff(part_failure_times(50.0, 3.0, rng))
+    assert np.std(gaps) / np.mean(gaps) < 0.5
+
+
+def test_machine_factors_are_recorded_and_drive_failure_counts(run):
+    paths, r = run
+    m = pd.read_parquet(paths.truth / "machines.parquet")
+    assert len(m) == len(r.equipements) and abs(m["frailty"].mean() - 1) < 0.25
+    counts = r.pannes.groupby("equipement").size().reindex(m["code"], fill_value=0)
+    assert np.corrcoef(m["facteur"], counts)[0, 1] > 0.3        # worse machines fail more

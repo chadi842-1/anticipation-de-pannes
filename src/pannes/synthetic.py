@@ -16,9 +16,16 @@ reproduces its PROBLEMS, so the cleaning and loading code has the same work to d
     equipement_inconnu   code missing from the equipment register (typo or unknown asset)
     champ_manquant       part or breakdown date left empty
 
-The true breakdown process: each part of each machine fails as a Poisson process with a
-part-specific yearly rate; breakdowns of one machine never overlap; declaration delays are
-log-normal with a share of late (> 24 h) declarations, which the Flask app is meant to prevent.
+The true breakdown process (v2, fixed before any prediction model was written):
+- each part of each machine is a renewal process: the time between two failures follows a
+  Weibull law with a part-specific shape (> 1 = wear-out: bearings, belts, filters, cables;
+  about 1 = random: sensors, motors) and a mean set by the part's yearly rate;
+- each machine has a rate multiplier: frailty (gamma, mean 1) times an age effect
+  (+4 % per year of service beyond 8 years);
+- breakdowns of one machine never overlap; declaration delays are log-normal with a share of
+  late (> 24 h) declarations, which the Flask app is meant to prevent.
+So failures ARE partly predictable from a part's time since its last replacement, the machine's
+history and its age; v1 of this generator used constant Poisson rates, where nothing was.
 """
 from __future__ import annotations
 
@@ -41,6 +48,14 @@ PART_RATE = {
     "Filtre": 4.0, "Courroie": 2.5, "Roulement": 2.0, "Clapet": 1.0, "Rouleau": 1.8,
     "Moteur": 0.6, "Garniture mécanique": 2.2, "Turbine": 0.4, "Câble": 0.9, "Frein": 1.4,
     "Moteur de levage": 0.5,
+}
+# Weibull shape of the time between failures: > 1 means wear-out (risk rises with the part's
+# age since its last replacement), about 1 means random failures (electronics, sensors).
+PART_SHAPE = {
+    "Vérin hydraulique": 1.5, "Joint": 1.8, "Pompe hydraulique": 1.4, "Capteur de pression": 1.0,
+    "Filtre": 3.0, "Courroie": 2.2, "Roulement": 2.5, "Clapet": 1.3, "Rouleau": 1.8,
+    "Moteur": 1.2, "Garniture mécanique": 2.0, "Turbine": 1.2, "Câble": 2.5, "Frein": 2.0,
+    "Moteur de levage": 1.3,
 }
 DEFECT_RATES = {"duplicate": 0.04, "date_incoherente": 0.02, "date_future": 0.005,
                 "date_illisible": 0.01, "equipement_inconnu": 0.01, "champ_manquant": 0.01}
@@ -83,15 +98,46 @@ def make_equipements(rng: np.random.Generator, per_type_site: int = 4) -> pd.Dat
     return pd.DataFrame(rows)
 
 
-def make_pannes(eq: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
-    days = (END - START).days
+def machine_factors(eq: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+    """Per-machine multiplier on failure rates: frailty (some units are simply worse) times an
+    age effect (+4 % per year of service beyond 8 years, -4 % per year below)."""
+    age = np.array([(START.date() - d).days / 365.25 for d in eq["mise_en_service"]])
+    frailty = rng.gamma(shape=4.0, scale=0.25, size=len(eq))          # mean 1, sd 0.5
+    return pd.DataFrame({"code": eq["code"].to_numpy(), "age_ans": age.round(2),
+                         "frailty": frailty.round(3),
+                         "facteur": (frailty * np.exp(0.04 * (age - 8))).round(3)})
+
+
+def part_failure_times(rate_per_year: float, shape: float, rng: np.random.Generator,
+                       burn_in_days: int = 3 * 365) -> list[float]:
+    """Renewal process: Weibull time between failures of one part on one machine (the part is
+    replaced at each failure). Simulated from a burn-in before START so that, at START, parts
+    are at realistic, varied ages. Returns failure times in days since START."""
+    from math import gamma
+
+    mean_days = 365.0 / rate_per_year
+    scale = mean_days / gamma(1 + 1 / shape)
+    t, out = -float(burn_in_days), []
+    horizon = (END - START).days
+    while True:
+        t += float(scale * rng.weibull(shape))
+        if t >= horizon:
+            return out
+        if t >= 0:
+            out.append(t)
+
+
+def make_pannes(eq: pd.DataFrame, rng: np.random.Generator,
+                machines: pd.DataFrame | None = None) -> pd.DataFrame:
+    machines = machine_factors(eq, rng) if machines is None else machines
+    factors = machines.set_index("code")["facteur"]
     out = []
     for e in eq.itertuples():
         events = []
         for part in EQUIPMENT_TYPES[e.type][1]:
-            n = rng.poisson(PART_RATE[part] * days / 365)
-            for t in np.sort(rng.uniform(0, days, n)):
-                events.append((START + timedelta(days=float(t)), part))
+            rate = PART_RATE[part] * float(factors[e.code])
+            for t in part_failure_times(rate, PART_SHAPE[part], rng):
+                events.append((START + timedelta(days=t), part))
         events.sort()
         free_at = START
         for t, part in events:
@@ -201,7 +247,8 @@ def generate(paths: Paths, seed: int = SEED, per_type_site: int = 4,
     rates = DEFECT_RATES if defect_rates is None else defect_rates
     rng = np.random.default_rng(seed)
     eq = make_equipements(rng, per_type_site)
-    pannes = make_pannes(eq, rng)
+    machines = machine_factors(eq, rng)
+    pannes = make_pannes(eq, rng, machines)
     eq_codes = set(eq["code"])
     _write_register(paths, eq, rng)
 
@@ -245,6 +292,7 @@ def generate(paths: Paths, seed: int = SEED, per_type_site: int = 4,
         json.dumps({"extraction_date": EXTRACTION_DATE.date().isoformat(), "files": files},
                    indent=2))
     pannes.to_parquet(paths.truth / "pannes.parquet", index=False)
+    machines.to_parquet(paths.truth / "machines.parquet", index=False)
     rows_df.to_parquet(paths.truth / "rows.parquet", index=False)
     return SyntheticRun(eq, pannes, rows_df, files)
 
